@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Binance Futures Testnet Trading Bot</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0a0e17;
+            --bg-secondary: #111827;
+            --bg-card: #1a1f2e;
+            --border: #2d3548;
+            --accent: #f0b90b;
+            --accent-hover: #d4a20a;
+            --green: #0ecb81;
+            --red: #f6465d;
+            --text-primary: #eaecef;
+            --text-secondary: #848e9c;
+            --text-muted: #5e6673;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+        }
+
+        /* ── Header ─────────────────────────────────────── */
+        .header {
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border);
+            padding: 1rem 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .header h1 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--accent);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .header h1 span {
+            font-size: 1.4rem;
+        }
+
+        .badge {
+            background: rgba(240, 185, 11, 0.15);
+            color: var(--accent);
+            font-size: 0.7rem;
+            font-weight: 600;
+            padding: 0.25rem 0.6rem;
+            border-radius: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        /* ── Main Layout ────────────────────────────────── */
+        .container {
+            max-width: 960px;
+            margin: 2rem auto;
+            padding: 0 1.5rem;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+        }
+
+        /* ── Card ────────────────────────────────────────── */
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+        }
+
+        .card-title {
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: var(--text-secondary);
+            margin-bottom: 1.25rem;
+        }
+
+        /* ── Form ────────────────────────────────────────── */
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+            margin-bottom: 0.35rem;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 0.65rem 0.85rem;
+            background: var(--bg-primary);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-family: inherit;
+            font-size: 0.9rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            border-color: var(--accent);
+        }
+
+        .form-group input::placeholder {
+            color: var(--text-muted);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.75rem;
+        }
+
+        /* ── Side Toggle ─────────────────────────────────── */
+        .side-toggle {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .side-btn {
+            padding: 0.6rem;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            background: transparent;
+            color: var(--text-secondary);
+            font-family: inherit;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .side-btn.active-buy {
+            border-color: var(--green);
+            color: var(--green);
+            background: rgba(14, 203, 129, 0.1);
+        }
+
+        .side-btn.active-sell {
+            border-color: var(--red);
+            color: var(--red);
+            background: rgba(246, 70, 93, 0.1);
+        }
+
+        .side-btn:hover {
+            opacity: 0.85;
+        }
+
+        /* ── Submit Button ───────────────────────────────── */
+        .submit-btn {
+            width: 100%;
+            padding: 0.75rem;
+            border: none;
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-top: 0.5rem;
+        }
+
+        .submit-btn.buy {
+            background: var(--green);
+            color: #fff;
+        }
+
+        .submit-btn.sell {
+            background: var(--red);
+            color: #fff;
+        }
+
+        .submit-btn:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+        }
+
+        .submit-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* ── Price field visibility ──────────────────────── */
+        .price-group {
+            display: none;
+        }
+
+        .price-group.visible {
+            display: block;
+        }
+
+        /* ── Response Panel ──────────────────────────────── */
+        .response-panel {
+            grid-column: 1 / -1;
+            display: none;
+        }
+
+        .response-panel.visible {
+            display: block;
+        }
+
+        .response-content {
+            background: var(--bg-primary);
+            border-radius: 8px;
+            padding: 1.25rem;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85rem;
+            line-height: 1.7;
+            overflow-x: auto;
+        }
+
+        .response-content .label {
+            color: var(--text-muted);
+            display: inline-block;
+            min-width: 140px;
+        }
+
+        .response-content .value {
+            color: var(--text-primary);
+        }
+
+        .response-content .success {
+            color: var(--green);
+            font-weight: 600;
+        }
+
+        .response-content .error {
+            color: var(--red);
+            font-weight: 600;
+        }
+
+        /* ── Order History ───────────────────────────────── */
+        .history-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.82rem;
+        }
+
+        .history-table th {
+            text-align: left;
+            padding: 0.6rem 0.5rem;
+            color: var(--text-muted);
+            font-weight: 500;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .history-table td {
+            padding: 0.6rem 0.5rem;
+            border-bottom: 1px solid rgba(45, 53, 72, 0.5);
+            color: var(--text-secondary);
+        }
+
+        .history-table .buy-text {
+            color: var(--green);
+        }
+
+        .history-table .sell-text {
+            color: var(--red);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        /* ── Spinner ─────────────────────────────────────── */
+        .spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-top-color: #fff;
+            border-radius: 50%;
+            animation: spin 0.6s linear infinite;
+            margin-right: 0.5rem;
+            vertical-align: middle;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* ── Responsive ──────────────────────────────────── */
+        @media (max-width: 700px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+
+            .response-panel {
+                grid-column: 1;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="header">
+        <h1><span>⚡</span> Trading Bot</h1>
+        <span class="badge">Testnet</span>
+    </div>
+
+    <div class="container">
+        <!-- ─── Order Form ─────────────────────────────────── -->
+        <div class="card">
+            <div class="card-title">Place Order</div>
+            <form id="orderForm">
+                {% csrf_token %}
+
+                <div class="form-group">
+                    <label>Symbol</label>
+                    <input type="text" id="symbol" name="symbol" placeholder="e.g. BTCUSDT" value="BTCUSDT" required>
+                </div>
+
+                <label
+                    style="font-size:0.8rem;font-weight:500;color:var(--text-secondary);margin-bottom:0.35rem;display:block;">Side</label>
+                <div class="side-toggle">
+                    <button type="button" class="side-btn active-buy" id="btnBuy" onclick="setSide('BUY')">BUY</button>
+                    <button type="button" class="side-btn" id="btnSell" onclick="setSide('SELL')">SELL</button>
+                </div>
+                <input type="hidden" id="side" name="side" value="BUY">
+
+                <div class="form-group">
+                    <label>Order Type</label>
+                    <select id="orderType" name="order_type" onchange="togglePrice()">
+                        <option value="MARKET">MARKET</option>
+                        <option value="LIMIT">LIMIT</option>
+                    </select>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Quantity</label>
+                        <input type="number" id="quantity" name="quantity" placeholder="0.001" step="any" min="0"
+                            required>
+                    </div>
+                    <div class="form-group price-group" id="priceGroup">
+                        <label>Price</label>
+                        <input type="number" id="price" name="price" placeholder="50000" step="any" min="0">
+                    </div>
+                </div>
+
+                <button type="submit" class="submit-btn buy" id="submitBtn">Place BUY Order</button>
+            </form>
+        </div>
+
+        <!-- ─── Recent Orders ──────────────────────────────── -->
+        <div class="card">
+            <div class="card-title">Recent Orders</div>
+            <div id="historyPanel">
+                {% if orders %}
+                <table class="history-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Symbol</th>
+                            <th>Side</th>
+                            <th>Type</th>
+                            <th>Qty</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for o in orders %}
+                        <tr>
+                            <td>{{ o.order_id|default:"—" }}</td>
+                            <td>{{ o.symbol }}</td>
+                            <td class="{% if o.side == 'BUY' %}buy-text{% else %}sell-text{% endif %}">{{ o.side }}</td>
+                            <td>{{ o.order_type }}</td>
+                            <td>{{ o.quantity }}</td>
+                            <td>{{ o.status }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% else %}
+                <div class="empty-state">No orders yet.<br>Place your first order to see it here.</div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- ─── Response Panel ─────────────────────────────── -->
+        <div class="card response-panel" id="responsePanel">
+            <div class="card-title">Order Response</div>
+            <div class="response-content" id="responseContent"></div>
+        </div>
+    </div>
+
+    <script>
+        let currentSide = 'BUY';
+
+        function line(label, value) {
+            return `<div><span class="label">${label}</span><span class="value">${value}</span></div>`;
+        }
+
+        function setSide(side) {
+            currentSide = side;
+            document.getElementById('side').value = side;
+            const btnBuy = document.getElementById('btnBuy');
+            const btnSell = document.getElementById('btnSell');
+            const submitBtn = document.getElementById('submitBtn');
+
+            btnBuy.className = 'side-btn' + (side === 'BUY' ? ' active-buy' : '');
+            btnSell.className = 'side-btn' + (side === 'SELL' ? ' active-sell' : '');
+            submitBtn.className = 'submit-btn ' + side.toLowerCase();
+            submitBtn.textContent = 'Place ' + side + ' Order';
+        }
+
+        function togglePrice() {
+            const type = document.getElementById('orderType').value;
+            const pg = document.getElementById('priceGroup');
+            pg.classList.toggle('visible', type === 'LIMIT');
+            if (type !== 'LIMIT') document.getElementById('price').value = '';
+        }
+
+        document.getElementById('orderForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
+            const btn = document.getElementById('submitBtn');
+            const panel = document.getElementById('responsePanel');
+            const content = document.getElementById('responseContent');
+
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner"></span> Placing order...';
+
+            const payload = {
+                symbol: document.getElementById('symbol').value.trim().toUpperCase(),
+                side: currentSide,
+                order_type: document.getElementById('orderType').value,
+                quantity: parseFloat(document.getElementById('quantity').value),
+            };
+            const priceVal = document.getElementById('price').value;
+            if (priceVal) payload.price = parseFloat(priceVal);
+
+            try {
+                const resp = await fetch('/api/order/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                    },
+                    body: JSON.stringify(payload),
+                });
+                const data = await resp.json();
+
+                panel.classList.add('visible');
+
+                if (data.success) {
+                    const r = data.response;
+                    content.innerHTML =
+                        `<div class="success">✓ Order placed successfully!</div><br>` +
+                        line('Order ID', r.orderId) +
+                        line('Status', r.status) +
+                        line('Side', r.side) +
+                        line('Type', r.type) +
+                        line('Orig Qty', r.origQty) +
+                        line('Executed Qty', r.executedQty) +
+                        line('Avg Price', r.avgPrice || 'N/A');
+                    setTimeout(() => location.reload(), 2000);
+                } else {
+                    const errMsg = data.error || (data.errors ? data.errors.join(', ') : 'Unknown error');
+                    content.innerHTML = `<div class="error">✗ ${errMsg}</div>`;
+                }
+            } catch (err) {
+                panel.classList.add('visible');
+                content.innerHTML = `<div class="error">✗ Network error: ${err.message}</div>`;
+            }
+
+            btn.disabled = false;
+            btn.textContent = 'Place ' + currentSide + ' Order';
+        });
+    </script>
+
+</body>
+
+</html>
